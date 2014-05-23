@@ -1,0 +1,281 @@
+________________________________________________________________________________
+Frame3DD version: 20140514               http://frame3dd.sf.net/
+GPL Copyright (C) 1992-2014, Henri P. Gavin 
+Frame3DD is distributed in the hope that it will be useful but with no warranty.
+For details see the GNU Public Licence: http://www.fsf.org/copyleft/gpl.html
+________________________________________________________________________________
+
+Example B: a pyramid-shaped frame --- static and dynamic analysis (N mm ton) 
+Wed May 14 16:02:08 2014
+________________________________________________________________________________
+In 2D problems the Y-axis is vertical.  In 3D problems the Z-axis is vertical.
+________________________________________________________________________________
+    5 NODES              4 FIXED NODES        4 FRAME ELEMENTS   3 LOAD CASES   
+________________________________________________________________________________
+N O D E   D A T A                                           R E S T R A I N T S
+  Node       X              Y              Z         radius  Fx Fy Fz Mx My Mz
+    1       0.000000       0.000000    1000.000000    0.000   0  0  0  0  0  0
+    2   -1200.000000    -900.000000       0.000000    0.000   1  1  1  1  1  1
+    3    1200.000000    -900.000000       0.000000    0.000   1  1  1  1  1  1
+    4    1200.000000     900.000000       0.000000    0.000   1  1  1  1  1  1
+    5   -1200.000000     900.000000       0.000000    0.000   1  1  1  1  1  1
+F R A M E   E L E M E N T   D A T A					(local)
+  Elmnt  J1    J2     Ax   Asy   Asz    Jxx     Iyy     Izz       E       G roll  density
+    1     2     1   36.0  20.0  20.0 1000.0   492.0   492.0 200000.0 79300.0   0 7.85e-09
+    2     1     3   36.0  20.0  20.0 1000.0   492.0   492.0 200000.0 79300.0   0 7.85e-09
+    3     1     4   36.0  20.0  20.0 1000.0   492.0   492.0 200000.0 79300.0   0 7.85e-09
+    4     5     1   36.0  20.0  20.0 1000.0   492.0   492.0 200000.0 79300.0   0 7.85e-09
+  Include shear deformations.
+  Include geometric stiffness.
+
+L O A D   C A S E   1   O F   3  ... 
+
+   Gravity X =  0.0    Gravity Y =  0.0    Gravity Z =  -9806.330 
+   1 concentrated loads
+   0 uniformly distributed loads
+   0 trapezoidally distributed loads
+   0 concentrated point loads
+   0 temperature loads
+   0 prescribed displacements
+ N O D A L   L O A D S  +  E Q U I V A L E N T   N O D A L   L O A D S  (global)
+  Node        Fx          Fy          Fz          Mxx         Myy         Mzz
+     1     100.000    -200.000    -109.992       0.000       0.000       0.000
+     2       0.000       0.000      -2.498    -374.698     499.598       0.000
+     3       0.000       0.000      -2.498    -374.698    -499.598       0.000
+     4       0.000       0.000      -2.498     374.698    -499.598       0.000
+     5       0.000       0.000      -2.498     374.698     499.598       0.000
+
+L O A D   C A S E   2   O F   3  ... 
+
+   Gravity X =  0.0    Gravity Y =  0.0    Gravity Z =  -9806.330 
+   0 concentrated loads
+   2 uniformly distributed loads
+   2 trapezoidally distributed loads
+   0 concentrated point loads
+   1 temperature loads
+   0 prescribed displacements
+ N O D A L   L O A D S  +  E Q U I V A L E N T   N O D A L   L O A D S  (global)
+  Node        Fx          Fy          Fz          Mxx         Myy         Mzz
+     1      14.474      45.603      70.281   -1106.364   12204.840   22459.643
+     2     -40.000     -30.000      72.502   15875.302  -21167.069       0.000
+     3      54.083      72.111      -2.498  -12393.203    8514.281  -22534.696
+     4       2.134       1.600       1.401   -1011.131    1348.175       0.000
+     5       2.604       6.039      -0.188   -1690.994   -1491.289     687.032
+ U N I F O R M   L O A D S						(local)
+  Elmnt       Ux               Uy               Uz
+     2       0.00000000       0.10000000       0.00000000
+     1       0.00000000       0.00000000       0.10000000
+ T R A P E Z O I D A L   L O A D S					(local)
+  Elmnt       x1               x2               W1               W2
+     3      20.00000000      80.00000000       0.01000000       0.05000000  (x)
+     3       0.00000000       0.00000000       0.00000000       0.00000000  (y)
+     3      80.00000000     830.00000000      -0.05000000       0.07000000  (z)
+     4       0.00000000       0.00000000       0.00000000       0.00000000  (x)
+     4      68.00000000     330.00000000       0.05000000       0.00000000  (y)
+     4      80.00000000     830.00000000      -0.05000000       0.07000000  (z)
+ T E M P E R A T U R E   C H A N G E S					(local)
+  Elmnt     coef      hy        hz        Ty+       Ty-       Tz+       Tz-
+     1  1.20e-05    10.000    10.000    20.000    10.000    10.000   -10.000
+
+L O A D   C A S E   3   O F   3  ... 
+
+   Gravity X =  0.0    Gravity Y =  0.0    Gravity Z =  -9806.330 
+   0 concentrated loads
+   0 uniformly distributed loads
+   0 trapezoidally distributed loads
+   2 concentrated point loads
+   0 temperature loads
+   0 prescribed displacements
+ N O D A L   L O A D S  +  E Q U I V A L E N T   N O D A L   L O A D S  (global)
+  Node        Fx          Fy          Fz          Mxx         Myy         Mzz
+     1      69.513     -34.167    -106.454   26196.117 -114629.272  -52275.957
+     2     251.622     281.392    -557.698 -156439.366  183895.925   22220.907
+     3     -12.999     -94.251      66.729   40848.692   17951.709   32861.892
+     4       0.000       0.000      -2.498     374.698    -499.598       0.000
+     5       0.000       0.000      -2.498     374.698     499.598       0.000
+ C O N C E N T R A T E D   P O I N T   L O A D S				(local)
+  Elmnt       Px          Py          Pz          x
+     1       0.000     100.000    -900.000     600.000
+     2       0.000    -200.000     200.000     800.000
+
+E L A S T I C   S T I F F N E S S   A N A L Y S I S   via  L D L'  decomposition
+
+
+L O A D   C A S E   1   O F   3  ... 
+
+N O D E   D I S P L A C E M E N T S  					(global)
+  Node    X-dsp       Y-dsp       Z-dsp       X-rot       Y-rot       Z-rot
+     1    0.014127   -0.050229   -0.022374    0.000037    0.000009    0.000000
+F R A M E   E L E M E N T   E N D   F O R C E S				(local)
+  Elmnt  Node       Nx          Vy         Vz        Txx        Myy        Mzz
+     1      2    113.543c      0.003      2.082     -1.289   -627.688      6.039
+     1      1   -110.772c     -0.003      2.075      1.289    620.134      4.572
+     2      1    185.886c     -0.000      2.074      0.904   -620.112     -2.775
+     2      3   -188.657c      0.000      2.083     -0.904    627.326     -3.504
+     3      1    -14.410t     -0.007      2.075      1.285   -622.619     -4.567
+     3      4     11.639t      0.007      2.082     -1.285    628.131     -6.780
+     4      5    -86.753t      0.006      2.084     -0.908   -629.365      4.619
+     4      1     89.524t     -0.006      2.073      0.908    623.618      2.765
+R E A C T I O N S							(global)
+  Node        Fx          Fy          Fz         Mxx         Myy         Mzz
+     2      74.650      55.996      64.715     372.734    -504.973       4.980
+     3    -124.650      93.493     106.380     373.562     503.282      -3.108
+     4       8.666       6.507      -4.723    -380.720     499.632      -4.980
+     5     -58.666      44.004     -46.388    -379.892    -501.323       3.108
+R M S    R E L A T I V E    E Q U I L I B R I U M    E R R O R: 7.413e-33
+
+P E A K   F R A M E   E L E M E N T   I N T E R N A L   F O R C E S	(local)
+  Elmnt             Nx          Vy         Vz        Txx        Myy        Mzz
+     1   max    -110.772      -0.003      2.075      1.289    312.827      4.572
+     1   min    -113.543      -0.003     -2.082      1.289   -627.688     -6.039
+     2   max    -185.886       0.000      2.083     -0.904    313.030      2.775
+     2   min    -188.657       0.000     -2.074     -0.904   -627.326     -3.504
+     3   max      14.410       0.007      2.082     -1.285    311.373      4.567
+     3   min      11.639       0.007     -2.075     -1.285   -628.131     -6.780
+     4   max      89.524      -0.006      2.073      0.908    310.244      2.765
+     4   min      86.753      -0.006     -2.084      0.908   -629.365     -4.619
+
+L O A D   C A S E   2   O F   3  ... 
+
+N O D E   D I S P L A C E M E N T S  					(global)
+  Node    X-dsp       Y-dsp       Z-dsp       X-rot       Y-rot       Z-rot
+     1    0.064024    0.093060    0.087233   -0.000479    0.018973    0.028437
+F R A M E   E L E M E N T   E N D   F O R C E S				(local)
+  Elmnt  Node       Nx          Vy         Vz        Txx        Myy        Mzz
+     1      2    100.377c      4.132    -91.725  -1096.490  30000.718    147.133
+     1      1    -97.606c     -4.132    -84.395   1096.490 -23400.636   7321.948
+     2      1   -209.983t    -86.631     -0.913  -1124.530   3358.502 -22461.370
+     2      3    207.212t    -93.646      5.070   1124.530   2048.572  28761.024
+     3      1    159.370c      4.926     -3.244   -291.228   4957.891   5340.667
+     3      4   -163.941c     -4.926     -0.099    291.228    131.833   3544.760
+     4      5   -176.526t     -0.410     -3.692   -263.187   3688.342   2123.160
+     4      1    179.297t     -6.140      0.349    263.187   2217.123   7948.271
+R E A C T I O N S							(global)
+  Node        Fx          Fy          Fz         Mxx         Myy         Mzz
+     2     104.865      83.819     -20.679  -18961.136   23565.833    -475.011
+     3      84.065    -180.036    -110.720   14839.171   -8420.571   23296.733
+     4    -106.104     -85.829      91.018    1680.959    1500.367    2850.897
+     5    -116.121      86.693    -101.117    1112.262    3886.593    1716.458
+R M S    R E L A T I V E    E Q U I L I B R I U M    E R R O R: 6.018e-29
+
+P E A K   F R A M E   E L E M E N T   I N T E R N A L   F O R C E S	(local)
+  Elmnt             Nx          Vy         Vz        Txx        Myy        Mzz
+     1   max     -97.606      -4.132     91.725   1096.490  30000.718   7321.948
+     1   min    -100.377      -4.132    -84.395   1096.490 -13056.108   -147.133
+     2   max     209.983      86.631      5.070   1124.530   3358.502  28761.024
+     2   min     207.212     -93.646      0.913   1124.530  -2048.572 -15072.799
+     3   max    -159.370      -4.926     11.583    291.228   4957.891   3544.760
+     3   min    -163.941      -4.926     -2.582    291.228  -1280.658  -5340.667
+     4   max     179.297       0.410     12.031    263.187   3688.342   7948.271
+     4   min     176.526      -6.140     -2.134    263.187  -2912.206  -2146.378
+
+L O A D   C A S E   3   O F   3  ... 
+
+N O D E   D I S P L A C E M E N T S  					(global)
+  Node    X-dsp       Y-dsp       Z-dsp       X-rot       Y-rot       Z-rot
+     1    0.000249   -0.013374   -0.021701    0.048620   -0.171582   -0.081460
+F R A M E   E L E M E N T   E N D   F O R C E S				(local)
+  Elmnt  Node       Nx          Vy         Vz        Txx        Myy        Mzz
+     1      2     75.465c    -79.757    698.344   4331.973 -259887.091 -30367.208
+     1      1    -72.693c    -20.243    205.813  -4331.973  87174.447   6860.936
+     2      1     74.020c    118.696    -95.906   7179.167  27244.029  51683.821
+     2      3    -76.791c     81.304    -99.937  -7179.167 -51154.341 -38257.715
+     3      1     20.689c    -18.537     31.935   -356.711 -36069.596 -22005.531
+     3      4    -23.460c     18.537    -27.779    356.711 -17755.334 -11412.966
+     4      5     22.134c    -26.294     21.490  -3203.904 -12559.392 -16163.724
+     4      1    -19.363c     26.294    -17.334   3203.904 -22436.561 -31239.059
+R E A C T I O N S							(global)
+  Node        Fx          Fy          Fz         Mxx         Myy         Mzz
+     2    -212.250    -259.148     622.299  171183.524 -194527.085  -22817.243
+     3     -46.737     136.987     -40.311  -51757.310  -23852.173  -28210.927
+     4     -38.883      -6.461      -8.876    5391.256  -16857.035   -9247.873
+     5     -10.267     -24.352      29.307   -2312.966  -13136.005  -14495.174
+R M S    R E L A T I V E    E Q U I L I B R I U M    E R R O R: 2.810e-29
+
+P E A K   F R A M E   E L E M E N T   I N T E R N A L   F O R C E S	(local)
+  Elmnt             Nx          Vy         Vz        Txx        Myy        Mzz
+     1   max     -72.693      79.757    205.813  -4331.973 154643.060  30367.208
+     1   min     -75.465     -20.243   -698.344  -4331.973 -259887.091 -17082.083
+     2   max     -74.020      81.304     97.704  -7179.167  51154.341  42272.524
+     2   min     -76.791    -118.696   -102.203  -7179.167 -49219.009 -51683.821
+     3   max     -20.689      18.537    -27.779    356.711  17755.334  22005.531
+     3   min     -23.460      18.537    -31.935    356.711 -36069.596 -11412.966
+     4   max     -19.363      26.294    -17.334   3203.904  22436.561  16163.724
+     4   min     -22.134      26.294    -21.490   3203.904 -12559.392 -31239.059
+
+M O D A L   A N A L Y S I S   R E S U L T S
+  Total Mass:  1.020379e-01     Structural Mass:  2.037858e-03 
+N O D A L   M A S S E S	(diagonal of the mass matrix)			(global)
+  Node  X-mass      Y-mass      Z-mass      X-inrta     Y-inrta     Z-inrta
+     1 1.00723e-01 1.00738e-01 1.00733e-01 3.51392e+01 4.73634e+01 4.36768e+01
+     2 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02
+     3 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02
+     4 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02
+     5 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02 1.26482e+02
+  Use consistent mass matrix.
+N A T U R A L   F R E Q U E N C I E S   & 
+M A S S   N O R M A L I Z E D   M O D E   S H A P E S 
+ convergence tolerance: 1.000e-09 
+  MODE     1:   f= 18.808236 Hz,  T= 0.053168 sec
+		X- modal participation factor =  -2.5467e-02 
+		Y- modal participation factor =  -6.1093e-05 
+		Z- modal participation factor =  -6.3967e-07 
+  Node    X-dsp       Y-dsp       Z-dsp       X-rot       Y-rot       Z-rot
+     1  -2.609e-02  -1.255e-04  -6.331e-06  -2.851e-04   1.344e-01  -5.727e-02
+     2  -5.705e-09  -7.082e-10   6.815e-10   4.135e-07  -1.724e-06   1.206e-06
+     3  -5.685e-09   6.844e-10  -6.879e-10  -4.094e-07  -1.721e-06   1.210e-06
+     4  -3.947e-09  -3.078e-09  -7.076e-10   1.142e-06  -1.155e-06  -9.324e-08
+     5  -3.931e-09   3.055e-09   7.135e-10  -1.138e-06  -1.151e-06  -9.690e-08
+  MODE     2:   f= 19.105746 Hz,  T= 0.052340 sec
+		X- modal participation factor =  -1.0453e-02 
+		Y- modal participation factor =   2.2595e-04 
+		Z- modal participation factor =  -4.4533e-07 
+  Node    X-dsp       Y-dsp       Z-dsp       X-rot       Y-rot       Z-rot
+     1  -1.106e-02   4.824e-04  -4.408e-06   1.043e-03   5.497e-02   1.401e-01
+     2   2.203e-10  -3.701e-09   2.858e-10   1.236e-06   9.290e-08  -1.112e-06
+     3   1.514e-10   3.788e-09  -2.613e-10  -1.252e-06   8.057e-08  -1.126e-06
+     4  -4.231e-09   2.225e-09  -2.965e-10  -5.965e-07  -1.272e-06  -1.648e-06
+     5  -4.302e-09  -2.136e-09   2.717e-10   5.809e-07  -1.284e-06  -1.634e-06
+  MODE     3:   f= 19.690715 Hz,  T= 0.050785 sec
+		X- modal participation factor =   2.1673e-05 
+		Y- modal participation factor =   3.7251e-02 
+		Z- modal participation factor =  -2.6883e-05 
+  Node    X-dsp       Y-dsp       Z-dsp       X-rot       Y-rot       Z-rot
+     1   2.443e-05   8.567e-02  -2.661e-04   1.684e-01  -1.131e-04  -9.647e-04
+     2   6.128e-09   7.717e-09   2.341e-09  -1.328e-06   1.023e-06   1.152e-06
+     3  -6.151e-09   7.670e-09   2.342e-09  -1.314e-06  -1.030e-06  -1.133e-06
+     4   6.203e-09   7.732e-09  -2.352e-09  -1.299e-06   1.023e-06  -1.122e-06
+     5  -6.162e-09   7.772e-09  -2.353e-09  -1.310e-06  -1.011e-06   1.142e-06
+  MODE     4:   f= 31.711571 Hz,  T= 0.031534 sec
+		X- modal participation factor =  -3.8809e-09 
+		Y- modal participation factor =   3.1636e-01 
+		Z- modal participation factor =   1.4730e-06 
+  Node    X-dsp       Y-dsp       Z-dsp       X-rot       Y-rot       Z-rot
+     1  -1.389e-08   3.155e+00   1.458e-05  -1.416e-02   1.460e-08   2.507e-06
+     2   2.269e-07   1.701e-07   1.896e-07   1.107e-07  -1.599e-07  -2.954e-08
+     3  -2.269e-07   1.701e-07   1.896e-07   1.107e-07   1.600e-07   2.947e-08
+     4   2.269e-07   1.701e-07  -1.896e-07   1.089e-07  -1.592e-07   2.796e-08
+     5  -2.269e-07   1.701e-07  -1.896e-07   1.089e-07   1.591e-07  -2.803e-08
+  MODE     5:   f= 35.159165 Hz,  T= 0.028442 sec
+		X- modal participation factor =  -3.7619e-08 
+		Y- modal participation factor =   1.6832e-06 
+		Z- modal participation factor =   3.1839e-01 
+  Node    X-dsp       Y-dsp       Z-dsp       X-rot       Y-rot       Z-rot
+     1   1.962e-07  -7.359e-06   3.151e+00   1.429e-05   3.382e-07  -6.386e-10
+     2   2.518e-07   1.889e-07   2.104e-07   1.328e-07  -1.773e-07   2.134e-10
+     3  -2.518e-07   1.889e-07   2.104e-07   1.328e-07   1.773e-07  -2.059e-10
+     4  -2.518e-07  -1.889e-07   2.105e-07  -1.338e-07   1.783e-07  -2.124e-10
+     5   2.518e-07  -1.889e-07   2.105e-07  -1.339e-07  -1.783e-07   2.050e-10
+  MODE     6:   f= 42.248953 Hz,  T= 0.023669 sec
+		X- modal participation factor =   3.1739e-01 
+		Y- modal participation factor =   3.7638e-11 
+		Z- modal participation factor =  -2.6445e-08 
+  Node    X-dsp       Y-dsp       Z-dsp       X-rot       Y-rot       Z-rot
+     1   3.155e+00   3.908e-09  -2.617e-07  -2.142e-09   8.415e-03   1.752e-05
+     2   3.029e-07   2.270e-07   2.529e-07   1.506e-07  -1.125e-07  -6.129e-08
+     3   3.029e-07  -2.270e-07  -2.529e-07  -1.506e-07  -1.125e-07  -6.127e-08
+     4   3.029e-07   2.270e-07  -2.529e-07   1.494e-07  -1.114e-07   6.092e-08
+     5   3.029e-07  -2.270e-07   2.529e-07  -1.494e-07  -1.114e-07   6.094e-08
+M A T R I X    I T E R A T I O N S: 2
+There are 6 modes below 42.248953 Hz. ... All 6 modes were found.
+
