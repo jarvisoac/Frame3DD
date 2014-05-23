@@ -662,6 +662,7 @@ static const char *temp_dir(){
  */
 void output_path(const char *fname, char fullpath[], const int len, const char *default_outdir) {
 	int res;
+	const char *outdir;
 	assert(fname!=NULL);
 
 	/*			deprecated code, January 15 2010 ...
@@ -673,7 +674,6 @@ void output_path(const char *fname, char fullpath[], const int len, const char *
 	*/
 
 //		fprintf(stderr,"Generating output path for file '%s'\n",fname);
-		const char *outdir;
 		outdir = getenv("FRAME3DD_OUTDIR");
 		if (outdir==NULL) {
 			if (default_outdir==NULL)

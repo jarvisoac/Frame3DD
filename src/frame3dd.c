@@ -445,7 +445,7 @@ void element_end_forces(
 
 		for(j=1; j<=12; j++)	Q[m][j] = s[j];
 
-		if ( fabs(axial_strain > 0.001) )
+		if ( fabs(axial_strain) > 0.001 )
 		 fprintf(stderr," Warning! Frame element %2d has an average axial strain of %8.6f\n", m, axial_strain ); 
 
 	}
