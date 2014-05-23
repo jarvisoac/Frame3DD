@@ -59,6 +59,7 @@ Example G: a building with a set-back  (in,kip)
 1               # 1: include shear deformation
 1               # 1: include geometric stiffness
 2.0             # exaggerate static mesh deformations
+1.0             # zoom scale for 3D plotting
 12.0            # x-axis increment for internal force data, in
                 # if dx is -1 then internal force calculations are skipped.
 
@@ -105,13 +106,13 @@ Example G: a building with a set-back  (in,kip)
 0                               # 0: consistent mass ... 1: lumped mass matrix
 1e-6                            # mode shape tolerance
 0.0                             # shift value ... for unrestrained structures
-2.0                             # exaggerate modal mesh deformations
+7.0                             # exaggerate modal mesh deformations
 
 0                               # number of nodes with extra mass or inertia
 0                               # number of elements with extra mass 
 
 4                               # number of modes to animate, nA
  1  2  3  4                     # modes to animate, omit if nA == 0
-2.0                             # pan rate during animation
+3.0                             # pan rate during animation
 
 # End of input data file for example G

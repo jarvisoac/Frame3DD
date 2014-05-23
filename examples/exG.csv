@@ -59,6 +59,7 @@
 1,,"# 1: include shear deformation; 0: don't",,,,,,,,,,
 1,,"# 1: include geometric stiffness; 0: don't",,,,,,,,,,
 2,,"# exaggerate statoc mesh deformations",,,,,,,,,,
+1.0,,"# zoom scale for 3D plotting",,,,,,,,,,
 12,,"# x-axis increment for internal force data, in",,,,,,,,,,
 ,,"# if dx is -1 then internal force calculations are skipped",,,,,,,,,,
 ,,,,,,,,,,,,

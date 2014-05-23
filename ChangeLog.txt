@@ -1,3 +1,29 @@
+* Sat May 17 07:00:00 EST 2014 Henri Gavin <hpgavin> 0.20140514
+- clear a few warnings when compiling with -Wall
+- add more precision to the description of the numerical method in the
+user-manual.html
+- rename user-manual.html to Frame3DD-manual.html
+- fix link in website/index.html
+- add Frame3DD-manual.html to sourceforge repository and distributions
+- add scale variable to Input Data File to scale 3D plots in gnuplot 4.6
+
+* Fri May 16 07:00:00 EST 2014 Henri Gavin <hpgavin> 0.20140514
+- Reaction forces reflect the presence of loads applied directly on reaction coordinates
+- Reactions are computed and updating for partitioned matrix systems
+within ldl_dcmp_pm and ldl_mprove_pm. computing reactions in this way
+is valid only for linear elastic analyses
+- function compute_reaction_forces() was re-introduced ... 
+The superposition of incremental reaction forces dR does not 
+work in problems with geometric stiffness, since
+the stiffness changes at each iteration.    
+So the reactions are re-computed only for problems with geometric stiffness.    
+- Compute RMS equilibrium error for linear elastic analyses
+- The RMS equilibrium error makes use of only the upper triangle of [K_qq]
+- RMS equilibrium values are assessed for linear elastic analyses
+
+* Thu May 15 07:00:00 EST 2014 Henri Gavin <hpgavin> 0.20140514
+- merge add_feF() into element_end_forces()
+
 * Wed May 14 07:00:00 EST 2014 Henri Gavin <hpgavin> 0.20140514
 - include the effect of applied point loads at reaction coordinates on the computed reaction forces
 This change has simplified the calculations by eliminating the need for 

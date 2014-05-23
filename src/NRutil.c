@@ -761,8 +761,9 @@ void show_dvector ( double *A, int n )
 	int     j;
 
 	for (j=1; j <= n; j++) {
-		if (A[j] != 0)	fprintf(stdout,"%14.6e", A[j] );
-		else		fprintf(stdout,"   0       ");
+		if ( fabs(A[j]) >= 1.e-99)
+			fprintf(stdout,"%14.6e", A[j] );
+		else	fprintf(stdout,"   0       ");
 	}
 	fprintf(stdout," ]';\n\n");
 	return;
@@ -968,8 +969,8 @@ void save_dmatrix ( char filename[], double **A, int ml, int mh, int nl, int nh,
         (void) time(&now);
 	fprintf(fp_m,"%% filename: %s - %s", filename, ctime(&now));
 	fprintf(fp_m,"%% type: matrix \n");
-	fprintf(fp_m,"%% rows: %d\n", mh-ml+1 );
-	fprintf(fp_m,"%% columns: %d\n", nh-nl+1 );
+	fprintf(fp_m,"%% rows: %d\n", rows );
+	fprintf(fp_m,"%% columns: %d\n", cols );
 	if ( transpose ) {
 	    for (j=nl; j <= nh; j++) {
 		for (i=ml; i <= mh; i++) {

@@ -526,6 +526,7 @@ void read_run_data (
 	char	*infcpath,
 	double	*exagg_static,
 	double	exagg_flag,
+	float   *scale,
 	float	*dx,
 	int	*anlyz,
 	int	anlyz_flag,
@@ -568,8 +569,8 @@ void read_run_data (
 		fprintf(stderr,"MESHPATH  = %s \n", meshpath);
 	}
 
-	sfrv=fscanf( fp, "%d %d %lf %f", shear, geom,  exagg_static, dx );
-	if (sfrv != 4) sferr("shear, geom, exagg_static, or dx variables");
+	sfrv=fscanf( fp, "%d %d %lf %f %f", shear,geom, exagg_static,scale,dx );
+	if (sfrv != 5) sferr("shear, geom, exagg_static, scale, or dx variables");
 
 	if (*shear != 0 && *shear != 1) {
 	    errorMsg(" Rember to specify shear deformations with a 0 or a 1 \n after the frame element property info.\n");
@@ -832,9 +833,13 @@ void read_reaction_data (
 
 
 /*
- * READ_AND_ASSEMBLE_LOADS  -
- * read load information data, assemble un-restrained load vectors
- * 09 Sep 2008
+ * READ_AND_ASSEMBLE_LOADS  
+ * Read load information data, assemble load vectors in global coordinates
+ * Returns vector of equivalent loadal forces F_temp and F_mech and 
+ * a matrix of equivalent element end forces eqF_temp and eqF_mech from 
+ * distributed internal and temperature loadings.  
+ * eqF_temp and eqF_mech are computed for the global coordinate system 
+ * 2008-09-09, 2015-05-15
  */
 void read_and_assemble_loads (
 		FILE *fp,
@@ -850,9 +855,10 @@ void read_and_assemble_loads (
 		int shear,
 		int *nF, int *nU, int *nW, int *nP, int *nT, int *nD,
 		double **Q,
-		double **F_temp, double **F_mech, double **Fo, 
+		double **F_temp, double **F_mech, double *Fo, 
 		float ***U, float ***W, float ***P, float ***T, float **Dp,
-		double ***feF_mech, double ***feF_temp, 
+		double ***eqF_mech, // equivalent mech loads, global coord 
+		double ***eqF_temp, // equivalent temp loads, global coord 
 		int verbose
 ){
 	float	hy, hz;			/* section dimensions in local coords */
@@ -860,9 +866,10 @@ void read_and_assemble_loads (
 	float	x1,x2, w1,w2;
 	double	Ln, R1o, R2o, f01, f02; 
 
-	double	Nx1, Vy1, Vz1, Mx1=0.0, My1=0.0, Mz1=0.0, /* fixed end forces */
-		Nx2, Vy2, Vz2, Mx2=0.0, My2=0.0, Mz2=0.0,
-		Ksy, Ksz, 		/* shear deformatn coefficients	*/
+	/* equivalent element end forces from distributed and thermal loads */
+	double	Nx1, Vy1, Vz1, Mx1=0.0, My1=0.0, Mz1=0.0,
+		Nx2, Vy2, Vz2, Mx2=0.0, My2=0.0, Mz2=0.0;
+	double	Ksy, Ksz, 		/* shear deformatn coefficients	*/
 		a, b,			/* point load locations */
 		t1, t2, t3, t4, t5, t6, t7, t8, t9;	/* 3D coord Xfrm coeffs */
 	int	i,j,l, lc, n, n1, n2;
@@ -870,14 +877,15 @@ void read_and_assemble_loads (
 
 	char	errMsg[MAXL];
 
-					/* initialize load vectors to zero */
+	/* initialize load data vectors and matrices to zero */
+	for (j=1; j<=DoF; j++)	Fo[j] = 0.0;
 	for (j=1; j<=DoF; j++)
 		for (lc=1; lc <= nL; lc++)
-			Fo[lc][j] = F_temp[lc][j] = F_mech[lc][j] = 0.0;
+			F_temp[lc][j] = F_mech[lc][j] = 0.0;
 	for (i=1; i<=12; i++)
 		for (n=1; n<=nE; n++)
 			for (lc=1; lc <= nL; lc++)
-				feF_mech[lc][n][i] = feF_temp[lc][n][i] = 0.0;
+				eqF_mech[lc][n][i] = eqF_temp[lc][n][i] = 0.0;
 
 	for (i=1; i<=DoF; i++)	for (lc=1; lc<=nL; lc++) Dp[lc][i] = 0.0;
 
@@ -894,7 +902,7 @@ void read_and_assemble_loads (
 		fprintf(stdout,"\n");
 	  }
 
-	  /* gravity loads applied uniformly to all frame elements	*/
+	  /* gravity loads applied uniformly to all frame elements ------- */
 	  sfrv=fscanf(fp,"%f %f %f", &gX[lc], &gY[lc], &gZ[lc] );
 	  if (sfrv != 3) sferr("gX gY gZ values in load data");
 
@@ -905,40 +913,40 @@ void read_and_assemble_loads (
 		coord_trans ( xyz, L[n], n1, n2,
 			&t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9, p[n] );
 
-		feF_mech[lc][n][1]  = d[n]*Ax[n]*L[n]*gX[lc] / 2.0;
-		feF_mech[lc][n][2]  = d[n]*Ax[n]*L[n]*gY[lc] / 2.0;
-		feF_mech[lc][n][3]  = d[n]*Ax[n]*L[n]*gZ[lc] / 2.0;
+		eqF_mech[lc][n][1]  = d[n]*Ax[n]*L[n]*gX[lc] / 2.0;
+		eqF_mech[lc][n][2]  = d[n]*Ax[n]*L[n]*gY[lc] / 2.0;
+		eqF_mech[lc][n][3]  = d[n]*Ax[n]*L[n]*gZ[lc] / 2.0;
 
-		feF_mech[lc][n][4]  = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
+		eqF_mech[lc][n][4]  = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
 			( (-t4*t8+t5*t7)*gY[lc] + (-t4*t9+t6*t7)*gZ[lc] );
-		feF_mech[lc][n][5]  = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
+		eqF_mech[lc][n][5]  = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
 			( (-t5*t7+t4*t8)*gX[lc] + (-t5*t9+t6*t8)*gZ[lc] );
-		feF_mech[lc][n][6]  = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
+		eqF_mech[lc][n][6]  = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
 			( (-t6*t7+t4*t9)*gX[lc] + (-t6*t8+t5*t9)*gY[lc] );
 
-		feF_mech[lc][n][7]  = d[n]*Ax[n]*L[n]*gX[lc] / 2.0;
-		feF_mech[lc][n][8]  = d[n]*Ax[n]*L[n]*gY[lc] / 2.0;
-		feF_mech[lc][n][9]  = d[n]*Ax[n]*L[n]*gZ[lc] / 2.0;
+		eqF_mech[lc][n][7]  = d[n]*Ax[n]*L[n]*gX[lc] / 2.0;
+		eqF_mech[lc][n][8]  = d[n]*Ax[n]*L[n]*gY[lc] / 2.0;
+		eqF_mech[lc][n][9]  = d[n]*Ax[n]*L[n]*gZ[lc] / 2.0;
 
-		feF_mech[lc][n][10] = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
+		eqF_mech[lc][n][10] = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
 			( ( t4*t8-t5*t7)*gY[lc] + ( t4*t9-t6*t7)*gZ[lc] );
-		feF_mech[lc][n][11] = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
+		eqF_mech[lc][n][11] = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
 			( ( t5*t7-t4*t8)*gX[lc] + ( t5*t9-t6*t8)*gZ[lc] );
-		feF_mech[lc][n][12] = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
+		eqF_mech[lc][n][12] = d[n]*Ax[n]*L[n]*L[n] / 12.0 *
 			( ( t6*t7-t4*t9)*gX[lc] + ( t6*t8-t5*t9)*gY[lc] );
 
-		/* debugging ... check feF data
+		/* debugging ... check eqF data
 		printf("n=%d ", n);
 		for (l=1;l<=12;l++) {
-			if (feF_mech[lc][n][l] != 0)
-			   printf(" feF %d = %9.2e ", l, feF_mech[lc][n][l] );
+			if (eqF_mech[lc][n][l] != 0)
+			   printf(" eqF %d = %9.2e ", l, eqF_mech[lc][n][l] );
 		}
 		printf("\n");
 		*/
 	  }					/* end gravity loads */
 
-
-	  sfrv=fscanf(fp,"%d", &nF[lc] );	/* node point loads	*/
+	  /* node point loads -------------------------------------------- */
+	  sfrv=fscanf(fp,"%d", &nF[lc] );
 	  if (sfrv != 1) sferr("nF value in load data");
 	  if ( verbose ) {
 		fprintf(stdout,"  number of loaded nodes ");
@@ -962,7 +970,8 @@ void read_and_assemble_loads (
 		    fprintf(stderr,"\n   Warning: All node loads applied at node %d  are zero\n", j );
 	  }					/* end node point loads  */
 
-	  sfrv=fscanf(fp,"%d", &nU[lc] );	/* uniformly distributed loads */
+	  /* uniformly distributed loads --------------------------------- */
+	  sfrv=fscanf(fp,"%d", &nU[lc] );
 	  if (sfrv != 1) sferr("nU value in uniform load data");
 	  if ( verbose ) {
 		fprintf(stdout,"  number of uniformly distributed loads ");
@@ -1001,9 +1010,9 @@ void read_and_assemble_loads (
 		Mz1 =  U[lc][i][3]*Le[n]*Le[n] / 12.0;	Mz2 = -Mz1;
 
 		/* debugging ... check end force values
-		printf("n=%d Vy=%9.2e Vz=%9.2e My=%9.2e Mz=%9.2e\n",
-						n, Vy1,Vz1, My1,Mz1 );
-		*/
+		 * printf("n=%d Vy=%9.2e Vz=%9.2e My=%9.2e Mz=%9.2e\n",
+		 *				n, Vy1,Vz1, My1,Mz1 );
+		 */
 
 		n1 = J1[n];	n2 = J2[n];
 
@@ -1017,31 +1026,32 @@ void read_and_assemble_loads (
 		*/
 
 		/* {F} = [T]'{Q} */
-		feF_mech[lc][n][1]  += ( Nx1*t1 + Vy1*t4 + Vz1*t7 );
-		feF_mech[lc][n][2]  += ( Nx1*t2 + Vy1*t5 + Vz1*t8 );
-		feF_mech[lc][n][3]  += ( Nx1*t3 + Vy1*t6 + Vz1*t9 );
-		feF_mech[lc][n][4]  += ( Mx1*t1 + My1*t4 + Mz1*t7 );
-		feF_mech[lc][n][5]  += ( Mx1*t2 + My1*t5 + Mz1*t8 );
-		feF_mech[lc][n][6]  += ( Mx1*t3 + My1*t6 + Mz1*t9 );
+		eqF_mech[lc][n][1]  += ( Nx1*t1 + Vy1*t4 + Vz1*t7 );
+		eqF_mech[lc][n][2]  += ( Nx1*t2 + Vy1*t5 + Vz1*t8 );
+		eqF_mech[lc][n][3]  += ( Nx1*t3 + Vy1*t6 + Vz1*t9 );
+		eqF_mech[lc][n][4]  += ( Mx1*t1 + My1*t4 + Mz1*t7 );
+		eqF_mech[lc][n][5]  += ( Mx1*t2 + My1*t5 + Mz1*t8 );
+		eqF_mech[lc][n][6]  += ( Mx1*t3 + My1*t6 + Mz1*t9 );
 
-		feF_mech[lc][n][7]  += ( Nx2*t1 + Vy2*t4 + Vz2*t7 );
-		feF_mech[lc][n][8]  += ( Nx2*t2 + Vy2*t5 + Vz2*t8 );
-		feF_mech[lc][n][9]  += ( Nx2*t3 + Vy2*t6 + Vz2*t9 );
-		feF_mech[lc][n][10] += ( Mx2*t1 + My2*t4 + Mz2*t7 );
-		feF_mech[lc][n][11] += ( Mx2*t2 + My2*t5 + Mz2*t8 );
-		feF_mech[lc][n][12] += ( Mx2*t3 + My2*t6 + Mz2*t9 );
+		eqF_mech[lc][n][7]  += ( Nx2*t1 + Vy2*t4 + Vz2*t7 );
+		eqF_mech[lc][n][8]  += ( Nx2*t2 + Vy2*t5 + Vz2*t8 );
+		eqF_mech[lc][n][9]  += ( Nx2*t3 + Vy2*t6 + Vz2*t9 );
+		eqF_mech[lc][n][10] += ( Mx2*t1 + My2*t4 + Mz2*t7 );
+		eqF_mech[lc][n][11] += ( Mx2*t2 + My2*t5 + Mz2*t8 );
+		eqF_mech[lc][n][12] += ( Mx2*t3 + My2*t6 + Mz2*t9 );
 
-		/* debugging ... check feF values
+		/* debugging ... check eqF values
 		printf("n=%d ", n);
 		for (l=1;l<=12;l++) {
-			if (feF_mech[lc][n][l] != 0)
-			   printf(" feF %d = %9.2e ", l, feF_mech[lc][n][l] );
+			if (eqF_mech[lc][n][l] != 0)
+			   printf(" eqF %d = %9.2e ", l, eqF_mech[lc][n][l] );
 		}
 		printf("\n");
 		*/ 
 	  }				/* end uniformly distributed loads */
 
-	  sfrv=fscanf(fp,"%d", &nW[lc] ); /* trapezoidally distributed loads */
+	  /* trapezoidally distributed loads ----------------------------- */
+	  sfrv=fscanf(fp,"%d", &nW[lc] );
 	  if (sfrv != 1) sferr("nW value in load data");
 	  if ( verbose ) {
 		fprintf(stdout,"  number of trapezoidally distributed loads ");
@@ -1214,33 +1224,34 @@ void read_and_assemble_loads (
 		*/
 
 		/* {F} = [T]'{Q} */
-		feF_mech[lc][n][1]  += ( Nx1*t1 + Vy1*t4 + Vz1*t7 );
-		feF_mech[lc][n][2]  += ( Nx1*t2 + Vy1*t5 + Vz1*t8 );
-		feF_mech[lc][n][3]  += ( Nx1*t3 + Vy1*t6 + Vz1*t9 );
-		feF_mech[lc][n][4]  += ( Mx1*t1 + My1*t4 + Mz1*t7 );
-		feF_mech[lc][n][5]  += ( Mx1*t2 + My1*t5 + Mz1*t8 );
-		feF_mech[lc][n][6]  += ( Mx1*t3 + My1*t6 + Mz1*t9 );
+		eqF_mech[lc][n][1]  += ( Nx1*t1 + Vy1*t4 + Vz1*t7 );
+		eqF_mech[lc][n][2]  += ( Nx1*t2 + Vy1*t5 + Vz1*t8 );
+		eqF_mech[lc][n][3]  += ( Nx1*t3 + Vy1*t6 + Vz1*t9 );
+		eqF_mech[lc][n][4]  += ( Mx1*t1 + My1*t4 + Mz1*t7 );
+		eqF_mech[lc][n][5]  += ( Mx1*t2 + My1*t5 + Mz1*t8 );
+		eqF_mech[lc][n][6]  += ( Mx1*t3 + My1*t6 + Mz1*t9 );
 
-		feF_mech[lc][n][7]  += ( Nx2*t1 + Vy2*t4 + Vz2*t7 );
-		feF_mech[lc][n][8]  += ( Nx2*t2 + Vy2*t5 + Vz2*t8 );
-		feF_mech[lc][n][9]  += ( Nx2*t3 + Vy2*t6 + Vz2*t9 );
-		feF_mech[lc][n][10] += ( Mx2*t1 + My2*t4 + Mz2*t7 );
-		feF_mech[lc][n][11] += ( Mx2*t2 + My2*t5 + Mz2*t8 );
-		feF_mech[lc][n][12] += ( Mx2*t3 + My2*t6 + Mz2*t9 );
+		eqF_mech[lc][n][7]  += ( Nx2*t1 + Vy2*t4 + Vz2*t7 );
+		eqF_mech[lc][n][8]  += ( Nx2*t2 + Vy2*t5 + Vz2*t8 );
+		eqF_mech[lc][n][9]  += ( Nx2*t3 + Vy2*t6 + Vz2*t9 );
+		eqF_mech[lc][n][10] += ( Mx2*t1 + My2*t4 + Mz2*t7 );
+		eqF_mech[lc][n][11] += ( Mx2*t2 + My2*t5 + Mz2*t8 );
+		eqF_mech[lc][n][12] += ( Mx2*t3 + My2*t6 + Mz2*t9 );
 
-		/* debugging ... check feF data
+		/* debugging ... check eqF data
 		for (l=1;l<=13;l++) printf(" %9.2e ", W[lc][i][l] );
 		printf("\n"); 
 		printf("n=%d ", n);
 		for (l=1;l<=12;l++) {
-			if (feF_mech[lc][n][l] != 0)
-			   printf(" feF %d = %9.3f ", l, feF_mech[lc][n][l] );
+			if (eqF_mech[lc][n][l] != 0)
+			   printf(" eqF %d = %9.3f ", l, eqF_mech[lc][n][l] );
 		}
 		printf("\n");
 		*/
 	  }			/* end trapezoidally distributed loads */
 
-	  sfrv=fscanf(fp,"%d", &nP[lc] );	/* element point loads	*/
+	  /* internal element point loads -------------------------------- */
+	  sfrv=fscanf(fp,"%d", &nP[lc] );
 	  if (sfrv != 1) sferr("nP value load data");
 	  if ( verbose ) {
 	  	fprintf(stdout,"  number of concentrated frame element point loads ");
@@ -1314,22 +1325,23 @@ void read_and_assemble_loads (
 			&t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9, p[n] );
 
 		/* {F} = [T]'{Q} */
-		feF_mech[lc][n][1]  += ( Nx1*t1 + Vy1*t4 + Vz1*t7 );
-		feF_mech[lc][n][2]  += ( Nx1*t2 + Vy1*t5 + Vz1*t8 );
-		feF_mech[lc][n][3]  += ( Nx1*t3 + Vy1*t6 + Vz1*t9 );
-		feF_mech[lc][n][4]  += ( Mx1*t1 + My1*t4 + Mz1*t7 );
-		feF_mech[lc][n][5]  += ( Mx1*t2 + My1*t5 + Mz1*t8 );
-		feF_mech[lc][n][6]  += ( Mx1*t3 + My1*t6 + Mz1*t9 );
+		eqF_mech[lc][n][1]  += ( Nx1*t1 + Vy1*t4 + Vz1*t7 );
+		eqF_mech[lc][n][2]  += ( Nx1*t2 + Vy1*t5 + Vz1*t8 );
+		eqF_mech[lc][n][3]  += ( Nx1*t3 + Vy1*t6 + Vz1*t9 );
+		eqF_mech[lc][n][4]  += ( Mx1*t1 + My1*t4 + Mz1*t7 );
+		eqF_mech[lc][n][5]  += ( Mx1*t2 + My1*t5 + Mz1*t8 );
+		eqF_mech[lc][n][6]  += ( Mx1*t3 + My1*t6 + Mz1*t9 );
 
-		feF_mech[lc][n][7]  += ( Nx2*t1 + Vy2*t4 + Vz2*t7 );
-		feF_mech[lc][n][8]  += ( Nx2*t2 + Vy2*t5 + Vz2*t8 );
-		feF_mech[lc][n][9]  += ( Nx2*t3 + Vy2*t6 + Vz2*t9 );
-		feF_mech[lc][n][10] += ( Mx2*t1 + My2*t4 + Mz2*t7 );
-		feF_mech[lc][n][11] += ( Mx2*t2 + My2*t5 + Mz2*t8 );
-		feF_mech[lc][n][12] += ( Mx2*t3 + My2*t6 + Mz2*t9 );
+		eqF_mech[lc][n][7]  += ( Nx2*t1 + Vy2*t4 + Vz2*t7 );
+		eqF_mech[lc][n][8]  += ( Nx2*t2 + Vy2*t5 + Vz2*t8 );
+		eqF_mech[lc][n][9]  += ( Nx2*t3 + Vy2*t6 + Vz2*t9 );
+		eqF_mech[lc][n][10] += ( Mx2*t1 + My2*t4 + Mz2*t7 );
+		eqF_mech[lc][n][11] += ( Mx2*t2 + My2*t5 + Mz2*t8 );
+		eqF_mech[lc][n][12] += ( Mx2*t3 + My2*t6 + Mz2*t9 );
 	  }					/* end element point loads */
 
-	  sfrv=fscanf(fp,"%d", &nT[lc] );	/* thermal loads	*/
+	  /* thermal loads ----------------------------------------------- */
+	  sfrv=fscanf(fp,"%d", &nT[lc] );
 	  if (sfrv != 1) sferr("nT value in load data");
 	  if ( verbose ) {
 	  	fprintf(stdout,"  number of temperature changes ");
@@ -1366,7 +1378,7 @@ void read_and_assemble_loads (
 		    exit(162);
 		}
 
-		Nx2 = (a/4.0)*( T[lc][i][5]+T[lc][i][6]+T[lc][i][7]+T[lc][i][8])*E[n]*Ax[n];
+		Nx2 = a*(1.0/4.0)*( T[lc][i][5]+T[lc][i][6]+T[lc][i][7]+T[lc][i][8])*E[n]*Ax[n];
 		Nx1 = -Nx2;
 		Vy1 = Vy2 = Vz1 = Vz2 = 0.0;
 		Mx1 = Mx2 = 0.0;
@@ -1381,41 +1393,44 @@ void read_and_assemble_loads (
 			&t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9, p[n] );
 
 		/* {F} = [T]'{Q} */
-		feF_temp[lc][n][1]  += ( Nx1*t1 + Vy1*t4 + Vz1*t7 );
-		feF_temp[lc][n][2]  += ( Nx1*t2 + Vy1*t5 + Vz1*t8 );
-		feF_temp[lc][n][3]  += ( Nx1*t3 + Vy1*t6 + Vz1*t9 );
-		feF_temp[lc][n][4]  += ( Mx1*t1 + My1*t4 + Mz1*t7 );
-		feF_temp[lc][n][5]  += ( Mx1*t2 + My1*t5 + Mz1*t8 );
-		feF_temp[lc][n][6]  += ( Mx1*t3 + My1*t6 + Mz1*t9 );
+		eqF_temp[lc][n][1]  += ( Nx1*t1 + Vy1*t4 + Vz1*t7 );
+		eqF_temp[lc][n][2]  += ( Nx1*t2 + Vy1*t5 + Vz1*t8 );
+		eqF_temp[lc][n][3]  += ( Nx1*t3 + Vy1*t6 + Vz1*t9 );
+		eqF_temp[lc][n][4]  += ( Mx1*t1 + My1*t4 + Mz1*t7 );
+		eqF_temp[lc][n][5]  += ( Mx1*t2 + My1*t5 + Mz1*t8 );
+		eqF_temp[lc][n][6]  += ( Mx1*t3 + My1*t6 + Mz1*t9 );
 
-		feF_temp[lc][n][7]  += ( Nx2*t1 + Vy2*t4 + Vz2*t7 );
-		feF_temp[lc][n][8]  += ( Nx2*t2 + Vy2*t5 + Vz2*t8 );
-		feF_temp[lc][n][9]  += ( Nx2*t3 + Vy2*t6 + Vz2*t9 );
-		feF_temp[lc][n][10] += ( Mx2*t1 + My2*t4 + Mz2*t7 );
-		feF_temp[lc][n][11] += ( Mx2*t2 + My2*t5 + Mz2*t8 );
-		feF_temp[lc][n][12] += ( Mx2*t3 + My2*t6 + Mz2*t9 );
+		eqF_temp[lc][n][7]  += ( Nx2*t1 + Vy2*t4 + Vz2*t7 );
+		eqF_temp[lc][n][8]  += ( Nx2*t2 + Vy2*t5 + Vz2*t8 );
+		eqF_temp[lc][n][9]  += ( Nx2*t3 + Vy2*t6 + Vz2*t9 );
+		eqF_temp[lc][n][10] += ( Mx2*t1 + My2*t4 + Mz2*t7 );
+		eqF_temp[lc][n][11] += ( Mx2*t2 + My2*t5 + Mz2*t8 );
+		eqF_temp[lc][n][12] += ( Mx2*t3 + My2*t6 + Mz2*t9 );
 	  }				/* end thermal loads	*/
 
-	  /* debugging ...  check feF's prior to asembly 
+	  /* debugging ...  check eqF's prior to asembly 
 	  for (n=1; n<=nE; n++) {	
 		printf("n=%d ", n);
 		for (l=1;l<=12;l++) {
-			if (feF_mech[lc][n][l] != 0)
-			   printf(" feF %d = %9.2e ", l, feF_mech[lc][n][l] );
+			if (eqF_mech[lc][n][l] != 0)
+			   printf(" eqF %d = %9.2e ", l, eqF_mech[lc][n][l] );
 		}
 		printf("\n"); 
 	  }
 	  */
 
+	  // assemble all element equivalent loads into 
+	  // separate load vectors for mechanical and thermal loading
 	  for (n=1; n<=nE; n++) {
 	     n1 = J1[n];	n2 = J2[n];
-	     for (i=1; i<= 6; i++) F_mech[lc][6*n1- 6+i] += feF_mech[lc][n][i];
-	     for (i=7; i<=12; i++) F_mech[lc][6*n2-12+i] += feF_mech[lc][n][i];
-	     for (i=1; i<= 6; i++) F_temp[lc][6*n1- 6+i] += feF_temp[lc][n][i];
-	     for (i=7; i<=12; i++) F_temp[lc][6*n2-12+i] += feF_temp[lc][n][i];
+	     for (i=1; i<= 6; i++) F_mech[lc][6*n1- 6+i] += eqF_mech[lc][n][i];
+	     for (i=7; i<=12; i++) F_mech[lc][6*n2-12+i] += eqF_mech[lc][n][i];
+	     for (i=1; i<= 6; i++) F_temp[lc][6*n1- 6+i] += eqF_temp[lc][n][i];
+	     for (i=7; i<=12; i++) F_temp[lc][6*n2-12+i] += eqF_temp[lc][n][i];
 	  }
 
-	  sfrv=fscanf(fp,"%d", &nD[lc] ); /* read prescribed displacements */
+	  /* prescribed displacements ------------------------------------ */
+	  sfrv=fscanf(fp,"%d", &nD[lc] );
 	  if (sfrv != 1) sferr("nD value in load data");
 	  if ( verbose ) {
 	  	fprintf(stdout,"  number of prescribed displacements ");
@@ -1939,13 +1954,13 @@ void write_input_data (
 
 /*
  * WRITE_STATIC_RESULTS -  save node displacements and frame element end forces
- * 09 Sep 2008
+ * 09 Sep 2008 , 2015-05-15
  */
 void write_static_results (
 		FILE *fp,
 		int nN, int nE, int nL, int lc, int DoF,
 		int *J1, int *J2,
-		double *F, double *D, int *r, double **Q,
+		double *F, double *D, double *R, int *r, double **Q,
 		double err, int ok, int axial_sign
 ){
 	double	disp;
@@ -2018,9 +2033,8 @@ void write_static_results (
 		     r[i+4] || r[i+5] || r[i+6] ) {
 			fprintf(fp, " %5d", j);
 			for (i=5; i>=0; i--) {
-				if ( !r[6*j-i] || fabs(F[6*j-i]) < 0.0001 )
-					fprintf (fp, "       0.0  ");
-				else    fprintf (fp, " %11.3f", F[6*j-i] );
+			    if ( r[6*j-i] ) fprintf (fp, " %11.3f", R[6*j-i] );
+			    else		fprintf (fp, "       0.0  ");
 			}
 			fprintf(fp, "\n");
 		}
@@ -2040,7 +2054,7 @@ void write_static_csv (
 		char *title,
 		int nN, int nE, int nL, int lc, int DoF,
 		int *J1, int *J2,
-		double *F, double *D, int *R, double **Q,
+		double *F, double *D, double *R, int *r, double **Q,
 		double err, int ok
 ){
 
@@ -2168,9 +2182,8 @@ void write_static_csv (
 		i = 6*(j-1);
 		fprintf(fpcsv, " %5d,", j);
 		for (i=5; i>=0; i--) {
-			if ( !R[6*j-i] || fabs(F[6*j-i]) < 0.0001 )
-				fprintf (fpcsv, "       0.0, ");
-			else    fprintf (fpcsv, " %12.5e,", F[6*j-i] );
+			if ( r[6*j-i] ) fprintf (fpcsv, " %12.5e,", R[6*j-i] );
+			else	fprintf (fpcsv, "       0.0, ");
 		}
 		fprintf(fpcsv, "\n");
 	}
@@ -2215,7 +2228,7 @@ void write_static_mfile (
 		char *OUT_file, char *title,
 		int nN, int nE, int nL, int lc, int DoF,
 		int *J1, int *J2,
-		double *F, double *D, int *R, double **Q,
+		double *F, double *D, double *R, int *r, double **Q,
 		double err, int ok
 ){
 	FILE	*fpm;
@@ -2326,9 +2339,9 @@ void write_static_mfile (
 	for (j=1; j<=nN; j++) {
 		i = 6*(j-1);
 		for (i=5; i>=0; i--) {
-			if ( !R[6*j-i] || fabs(F[6*j-i]) < 0.0001 )
+			if ( !r[6*j-i] || fabs(R[6*j-i]) < 0.0001 )
 				fprintf (fpm, "\t0.0\t");
-			else    fprintf (fpm, "\t%13.6e", -F[6*j-i] );
+			else    fprintf (fpm, "\t%13.6e", R[6*j-i] );
 		}
 		if ( j < nN )	fprintf(fpm," ; \n");
 		else		fprintf(fpm," ]'; \n\n");
@@ -2359,7 +2372,8 @@ void peak_internal_forces (
 		float *E, float *G, float *p,
 		float *d, float gX, float gY, float gZ,
 		int nU, float **U, int nW, float **W, int nP, float **P,
-		double *D, int shear,
+		double *D, int shear, 
+		float dx,	// x-axis increment along frame element
 
 		// vectors of peak forces, moments, displacements and slopes 
 		// for each frame element, for load case "lc" 
@@ -2382,7 +2396,7 @@ void peak_internal_forces (
 
 	double	xp;		/* location of internal point loads	*/
 
-	double	x, dx,		/* distance along frame element		*/
+	double	x, 		/* distance along frame element		*/
 
 		// underscored "_" variables correspond to x=(i-1)*dx;
 		// non-underscored variables correspond to x=i*dx;
@@ -3154,7 +3168,7 @@ void static_mesh(
 		char *title, int nN, int nE, int nL, int lc, int DoF,
 		vec3 *xyz, double *L,
 		int *N1, int *N2, float *p, double *D, 
-		double exagg_static, int D3_flag, int anlyz, float dx
+		double exagg_static, int D3_flag, int anlyz, float dx, float scale
 ){
 	FILE	*fpif=NULL, *fpm=NULL;
 	double	mx, my, mz; /* coordinates of the frame element number labels */
@@ -3243,7 +3257,7 @@ void static_mesh(
 	 // 3D plot setup commands
 
 	 fprintf(fpm,"%c set parametric\n", D3 );
-	 fprintf(fpm,"%c set view 60, 70, 1 \n", D3 );
+	 fprintf(fpm,"%c set view 60, 70, %5.2f \n", D3, scale );
 	 fprintf(fpm,"%c set view equal xyz # 1:1 3D axis scaling \n", D3 );
 	 fprintf(fpm,"%c unset key\n", D3 );
 	 fprintf(fpm,"%c set xlabel 'x'\n", D3 );
@@ -3520,7 +3534,8 @@ void animate(
 	vec3 *xyz, double *L, float *p,
 	int *J1, int *J2, double *f, double **V,
 	double exagg_modal, int D3_flag, 
-	float pan
+	float pan,		/* pan rate for animation	     */
+	float scale		/* inital zoom scale in 3D animation */
 ){
 	FILE	*fpm;
 
@@ -3532,9 +3547,9 @@ void animate(
 		rot_x_final =  60.0,	/* final  x-rotation in 3D animation */
 		rot_z_init  = 100.0,	/* inital z-rotation in 3D animation */
 		rot_z_final = 120.0,	/* final  z-rotation in 3D animation */
-		zoom_init  = 1.5,	/* inital zoom scale in 3D animation */
-		zoom_final = 1.7,	/* final  zoom scale in 3D animation */
-		frames = 25;	/* number of frames in animation	*/
+		zoom_init  = 1.0*scale,	/* init.  zoom scale in 3D animation */
+		zoom_final = 1.1*scale, /* final  zoom scale in 3D animation */
+		frames = 25;		/* number of frames in animation */
 
 	double	ex=10,		/* an exageration factor, for animation */
 		*v;
@@ -3605,11 +3620,11 @@ void animate(
 	   fprintf(fpm,"# z_min = %12.5e     z_max = %12.5e \n", z_min, z_max);
 	   fprintf(fpm,"# Dxyz = %12.5e \n", Dxyz );
 	   fprintf(fpm,"set xrange [ %lf : %lf ] \n",
-			x_min-0.1*Dxyz, x_max+0.1*Dxyz );
+			x_min-0.2*Dxyz, x_max+0.1*Dxyz );
 	   fprintf(fpm,"set yrange [ %lf : %lf ] \n",
-			y_min-0.1*Dxyz, y_max+0.1*Dxyz );
+			y_min-0.2*Dxyz, y_max+0.1*Dxyz );
 	   fprintf(fpm,"set zrange [ %lf : %lf ] \n",
-			z_min-0.1*Dxyz, z_max+0.1*Dxyz );
+			z_min-0.2*Dxyz, z_max+0.1*Dxyz );
 
 /*
  *	   if ( x_min != x_max )
@@ -3631,7 +3646,7 @@ void animate(
 
 	   fprintf(fpm,"unset xzeroaxis; unset yzeroaxis; unset zzeroaxis\n");
 	   fprintf(fpm,"unset xtics; unset ytics; unset ztics; \n");
-	   fprintf(fpm,"%c set view 60, 70, 1 \n", D3 );
+	   fprintf(fpm,"%c set view 60, 70, %5.2f \n", D3, scale );
 	   fprintf(fpm,"set size ratio -1    # 1:1 2D axis scaling \n");	
 	   fprintf(fpm,"%c set view equal xyz # 1:1 3D axis scaling \n", D3 );
 
@@ -3993,12 +4008,12 @@ void evaluate ( float error, float rms_resid, float tol, int geom )
 
 	color(0);
 	fprintf(stdout,"  RMS relative equilibrium error  = %9.3e ", error );
-	if ( error < tol && geom ) {
+	if ( error < tol ) {
 		fprintf(stdout," < tol = %7.1e ", tol );
 		(void) fflush(stdout);
 		textColor('y','b','b','x');
 		fprintf(stdout," ** converged ** ");
-	} if ( error > tol && geom ) {
+	} if ( error > tol ) {
 		fprintf(stdout," > tol = %7.1e ", tol );
 		(void) fflush(stdout);
 		textColor('y','r','b','x');

@@ -31,6 +31,7 @@ Example B: a pyramid-shaped frame --- static and dynamic analysis (N,mm,ton)
 1		# 1: include shear deformation
 1		# 1: include geometric stiffness
 10.0		# exaggerate static mesh deformations
+2.5		# zoom scale for 3D plotting
 20.0		# x-axis increment for internal forces, mm
 		# if dx is -1 then internal force calculations are skipped.
 

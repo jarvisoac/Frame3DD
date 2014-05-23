@@ -593,6 +593,7 @@ Example H: a pedestrian ramp  (units: kip, in)
 1                               # 1: include shear deformation
 1                               # 1: include geometric stiffness
 100.0                           # exaggerate static mesh deformations
+2.0				# zoom scale for 3D plotting
 -1.0                            # no internal force calculation
 
 

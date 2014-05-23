@@ -143,6 +143,7 @@ Example F: a seismically-isolated building model (units: N, mm, ton)
 1               # 1: include shear deformation
 1               # 1: include geometric stiffness
 500             # exaggerate static mesh deformations
+1.2             # zoom scale for 3D plotting
 50.0            # x-axis increment for internal force data, mm
                 # if dx is -1 then internal force calculations are skipped.
 

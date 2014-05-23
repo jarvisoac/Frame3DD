@@ -1,9 +1,9 @@
-" Frame3DD version: 20140514               http://frame3dd.sf.net/"
+" Frame3DD version: 20140514+               http://frame3dd.sf.net/"
 "GPL Copyright (C) 1992-2014, Henri P. Gavin "
 "Frame3DD is distributed in the hope that it will be useful but with no warranty."
 "For details see the GNU Public Licence: http://www.fsf.org/copyleft/gpl.html"
 "  Example E: a three-dimensional structure showing lateral-torsional dynamic modes (units: kip  in)               "
-" Wed May 14 16:02:04 2014
+" Sat May 17 15:28:08 2014
  "
 " .CSV formatted results of Frame3DD analysis "
 
@@ -69,8 +69,8 @@ Elmnt , Node  ,    Nx     ,    Vy   ,     Vz   ,     Txx   ,    Myy  ,     Mzz
      6,       0.0,        0.0,        0.0,        0.0,        0.0,        0.0, 
      7,       0.0,        0.0,        0.0,        0.0,        0.0,        0.0, 
      8,       0.0,        0.0,        0.0,        0.0,        0.0,        0.0, 
-     9, -5.27643e+01,  1.65303e+01, -1.95047e+02, -1.21670e+03, -3.28828e+03, -1.17371e+01,
-    10, -5.05720e+01, -3.49644e+02,  2.79129e+02,  2.12446e+04, -3.22459e+03, -1.17404e+01,
-    11,  1.57336e+02, -1.66886e+02,  4.15917e+02,  1.00260e+04,  8.97352e+03, -1.17396e+01,
+     9, -5.75770e+01,  2.16216e+01, -2.14910e+02, -1.42098e+03, -3.30599e+03, -1.37929e+01,
+    10, -4.40299e+01, -3.67323e+02,  2.34550e+02,  2.45807e+04, -3.12740e+03, -1.37958e+01,
+    11,  1.55607e+02, -1.54299e+02,  4.80360e+02,  1.14164e+04,  1.07680e+04, -1.37946e+01,
     12,       0.0,        0.0,        0.0,        0.0,        0.0,        0.0, 
 "R M S    R E L A T I V E    E Q U I L I B R I U M    E R R O R:", 1.604e-06

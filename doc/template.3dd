@@ -36,6 +36,7 @@ EL[nE] N1[nE] N2[nE] Ax[nE] Asy[nE] Asz[nE] Jx[nE] Iy[nE] Iz[nE] E[nE] G[nE] p[n
 shear        # 1=Do, 0=Don't include shear deformation effects
 geom         # 1=Do, 0=Don't include geometric stiffness effects
 exagg_static # exaggeration factor for static mesh deformations
+scale        # zoom scale for 3D plotting
 dx           # length of x-axis increment for frame element internal force data, mm
              # if dx is -1 then internal force calculations are skipped
 
