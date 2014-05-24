@@ -53,7 +53,7 @@ static int iminarg1,iminarg2;
 
 #if defined(__STDC__) || defined(ANSI) || defined(NRANSI) /* ANSI */
 
-void NRerror(char error_text[]);
+void NRerror(const char error_text[]);
 float *vector(long nl, long nh);
 int *ivector(long nl, long nh);
 unsigned char *cvector(long nl, long nh);
@@ -84,7 +84,7 @@ fcomplex **Cmatrix(int nrl, int nrh, int ncl, int nch);
 void free_Cvector(fcomplex *v, int nl, int nh);
 void free_Cmatrix(fcomplex **m, int nrl, int nrh, int ncl, int nch);
 
-void NRerror(char error_text[]);
+void NRerror(const char error_text[]);
 
 float  ***D3matrix(int nrl,int nrh, int ncl, int nch, int nzl, int nzh);
 double ***D3dmatrix(int nrl,int nrh, int ncl, int nch, int nzl, int nzh);
@@ -101,10 +101,10 @@ void save_dvector(char filename[], double *V, int nl, int nh, const char *mode);
 void save_ivector(char filename[], int *V, int nl, int nh, const char *mode);
 
 void save_matrix ( char filename[], float **A, int ml, int mh, int nl, int nh, int transpose, const char *mode );
-void save_dmatrix ( char filename[], double **A, int ml, int mh, int nl, int nh, int transpose, const char *mode );
+void save_dmatrix ( const char filename[], double **A, int ml, int mh, int nl, int nh, int transpose, const char *mode );
 
 void save_ut_matrix ( char filename[], float **A, int n, const char *mode );
-void save_ut_dmatrix ( char filename[], double **A, int n, const char *mode );
+void save_ut_dmatrix ( const char filename[], double **A, int n, const char *mode );
 
 
 

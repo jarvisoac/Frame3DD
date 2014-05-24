@@ -496,7 +496,7 @@ void force_bent_beam(
 /*
  * SFERR - display *scanf errors from output from *scanf function
  */
-void sferr( char *s );
+// void sferr( char *s );
 
 
 /*

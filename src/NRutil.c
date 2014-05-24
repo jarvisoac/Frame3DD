@@ -17,7 +17,7 @@
 #define NR_END 1
 #define FREE_ARG char*
 
-void NRerror(char error_text[])
+void NRerror(const char error_text[])
 /* Numerical Recipes standard error handler */
 {
 	fprintf(stderr,"Numerical Recipes run-time error...\n");
@@ -829,7 +829,6 @@ void save_vector( char filename[], float *V, int nl, int nh, const char *mode )
 {
 	FILE    *fp_v;
 	int     i;
-	void	exit();
 	time_t	now;
 
 	if ((fp_v = fopen (filename, mode)) == NULL) {
@@ -857,7 +856,6 @@ void save_dvector( char filename[], double *V, int nl, int nh, const char *mode 
 {
 	FILE    *fp_v;
 	int     i;
-	void	exit();
 	time_t	now;
 
 	if ((fp_v = fopen (filename, mode)) == NULL) {
@@ -885,7 +883,6 @@ void save_ivector( char filename[], int *V, int nl, int nh, const char *mode )
 {
 	FILE    *fp_v;
 	int     i;
-	void	exit();
 	time_t	now;
 
 	if ((fp_v = fopen (filename, mode)) == NULL) {
@@ -913,7 +910,6 @@ void save_matrix ( char filename[], float **A, int ml, int mh, int nl, int nh, i
 {
 	FILE    *fp_m;
 	int     i,j, rows, cols;
-	void	exit();
 	time_t	now;
 
 	if ( transpose ) rows = nh-nl+1; else rows = mh-ml+1;
@@ -952,11 +948,10 @@ void save_matrix ( char filename[], float **A, int ml, int mh, int nl, int nh, i
 /*
  * SAVE_DMATRIX  - save a matrix of dimension [ml..mh][nl..nh] to the named file
  */
-void save_dmatrix ( char filename[], double **A, int ml, int mh, int nl, int nh, int transpose, const char *mode )
+void save_dmatrix ( const char filename[], double **A, int ml, int mh, int nl, int nh, int transpose, const char *mode )
 {
 	FILE    *fp_m;
 	int     i,j, rows, cols;
-	void	exit();
 	time_t	now;
 
 	if ( transpose ) rows = nh-nl+1; else rows = mh-ml+1;
@@ -1001,7 +996,6 @@ void save_ut_matrix ( char filename[], float **A, int n, const char *mode )
 {
 	FILE    *fp_m;
 	int     i,j;
-        void	exit();
 	time_t	now;
 
 	if ((fp_m = fopen (filename, mode)) == NULL) {
@@ -1034,11 +1028,10 @@ void save_ut_matrix ( char filename[], float **A, int n, const char *mode )
  * save a symetric matrix of dimension [1..n][1..n] to the named file 
  * use only upper-triangular part
  */
-void save_ut_dmatrix ( char filename[], double **A, int n, const char *mode )
+void save_ut_dmatrix ( const char filename[], double **A, int n, const char *mode )
 {
 	FILE    *fp_m;
 	int     i,j;
-        void	exit();
 	time_t	now;
 
 	if ((fp_m = fopen (filename, mode)) == NULL) {

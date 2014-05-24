@@ -294,11 +294,8 @@ void ldl_mprove(
 ){
 	double  sdp;		/* accumulate the r.h.s. in double precision */
 	double  *resid,		/* the residual error		  	*/
-		rms_resid_new=0, /* the RMS error of the mprvd solution	*/
-		*dvector();	/* allocate memory for a vector	of doubles */
+		rms_resid_new=0; /* the RMS error of the mprvd solution	*/
 	int	j,i, pd;
-	void	ldl_dcmp(),
-		free_dvector();
 
 	resid = dvector(1,n);
 
@@ -487,11 +484,8 @@ void ldl_mprove_pm (
 	double  sdp;		// accumulate the r.h.s. in double precision
 	double  *dx,		// the residual error
 		*dc,		// update to partial r.h.s. vector, c
-		rms_resid_new=0.0, // the RMS error of the mprvd solution
-		*dvector();	// allocate memory for a vector	of doubles
+		rms_resid_new=0.0; // the RMS error of the mprvd solution
 	int	j,i, pd;
-	void	ldl_dcmp(),
-		free_dvector();
 
 	dx  = dvector(1,n);
 	dc  = dvector(1,n);
@@ -576,10 +570,8 @@ void PSB_update (
 void pseudo_inv(
 	double **A, double **Ai, int n, int m, double beta, int verbose
 ){
-	double	*diag, *b, *x, **AtA, **AtAi, tmp, tr_AtA=0.0,
-		*dvector(), **dmatrix(), error;
+	double	*diag, *b, *x, **AtA, **AtAi, tmp, tr_AtA=0.0, error;
 	int     i,j,k, ok; 
-	void	ldl_dcmp(), ldl_mprove(), free_dvector(), free_dmatrix();
 
 	diag = dvector(1,n);
 	b    = dvector(1,n);
