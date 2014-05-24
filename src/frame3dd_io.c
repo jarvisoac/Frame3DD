@@ -1598,12 +1598,15 @@ void read_mass_data (
 	fclose(mf);
 #endif
 
-	for (m=1;m<=nE;m++) {			/* check inertia data	*/
-	    if ( d[m] < 0.0 || EMs[m] < 0.0 || d[m]+EMs[m] <= 0.0 ) {
-		sprintf(errMsg,"\n  error: Non-positive mass or density\n  d[%d]= %f  EMs[%d]= %f\n",m,d[m],m,EMs[m]);
-		errorMsg(errMsg);
-		exit(88);
-	    }
+	 if( *nX > 0 )
+	 {
+		for (m=1;m<=nE;m++) {			/* check inertia data	*/
+			if ( d[m] < 0.0 || EMs[m] < 0.0 || d[m]+EMs[m] <= 0.0 ) {
+			sprintf(errMsg,"\n  error: Non-positive mass or density\n  d[%d]= %f  EMs[%d]= %f\n",m,d[m],m,EMs[m]);
+			errorMsg(errMsg);
+			exit(88);
+			}
+	 }
 	}
 /*	for (m=1;m<=nE;m++) ms += EMs[m]; // consistent mass doesn't agree  */
 /*	if ( ms > 0.0 )	    *lump = 1;    // with concentrated masses, EMs  */
