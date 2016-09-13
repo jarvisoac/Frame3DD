@@ -1294,8 +1294,8 @@ void read_and_assemble_loads (
 
 		Ln = L[n];
 
-		Nx1 = P[lc][i][2]*a/Ln;
-		Nx2 = P[lc][i][2]*b/Ln;
+		Nx1 = P[lc][i][2]*b/Ln;
+		Nx2 = P[lc][i][2]*a/Ln;
 
 		Vy1 = (1./(1.+Ksz))    * P[lc][i][3]*b*b*(3.*a + b) / ( Ln*Ln*Ln ) +
 			(Ksz/(1.+Ksz)) * P[lc][i][3]*b/Ln;
